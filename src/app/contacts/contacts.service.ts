@@ -12,21 +12,18 @@ export class ContactsService {
 
   getContact(id: string): Observable<Contact | undefined> {
     return this.http.get<Contact>(`api/contacts/${id}`)
-      .pipe(map(c => {
-        const dob = c.dateOfBirth ? new Date(c.dateOfBirth) : null;
-        return { ...c, dateOfBirth: dob }
-      }));
+      .pipe(map(c => { c.dateOfBirth = c.dateOfBirth.split('T')[0]; return c; }));
   }
 
   getAllContacts(): Observable<Contact[]> {
     return this.http.get<Contact[]>('api/contacts');
   }
 
-  saveContact(contact: Contact): Observable<Contact> {
+  saveContact(contact: Partial<Contact>): Observable<Contact> {
     const headers = { headers: { 'Content-Type': 'application/json' } };
 
     if (!contact.id || contact.id === '') {
-      let newContact: Contact = { ...contact, id: nanoid(5) };
+      let newContact: Partial<Contact> = { ...contact, id: nanoid(5) };
       return this.http.post<Contact>('api/contacts/', newContact, headers)
     }
     else
